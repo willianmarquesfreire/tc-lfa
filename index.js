@@ -17,26 +17,56 @@ function afd(str, automato) {
     });
     if (automato.estadosFinais.includes(estadoAtual)) return 'ACEITA'
     else return 'REJEITA'
-
 }
 
+// Quantidade par de a's sob o alfabeto {a,b}
 let automato = {
-    alfabeto: ['h', 'l', 'c', 'r'],
-    estados: ['0', '1', '2', '3a', '3b', '4a', '4b', '5', '6', '7'],
+    alfabeto: ['a', 'b'],
+    estados: ['0', '1'],
     estadoInicial: '0',
     funcoes: {
-        '0,c': '1',
-        '1,h': '2',
-        '2,l': '3a',
-        '2,r': '3b',
-        '3a,c': '4a',
-        '3b,c': '4b',
-        '4a,r': '5',
-        '4b,l': '5',
-        '5,h': '6',
-        '6,c': 'c'
+        '0,a': '1',
+        '0,b': '0',
+        '1,a': '0',
+        '1,b': '1'
     },
-    estadosFinais: ['c']
+    estadosFinais: ['0']
 }
 
-console.log(afd('chlcrhc', automato))
+console.log("AFD: ", afd('aa', automato))
+
+
+
+function afnd(str, automato) {
+    let cadeia = str.split('');
+    let estadosAtuais = automato.estadosIniciais;
+    cadeia.forEach((simbolo, index) => {
+        let novosEstados = [];
+        estadosAtuais.forEach(estadoAtual => {
+            console.log(estadoAtual + "," + simbolo)
+            let novoEstado = automato.funcoes[estadoAtual + "," + simbolo];
+            if (novoEstado) {
+                novosEstados = novosEstados.concat(novoEstado);
+            }
+        })
+        estadosAtuais = novosEstados;
+        if (novosEstados == null || novosEstados.length <= 0 ) return 'REJEITA'
+    })
+    if (estadosAtuais && automato.estadosFinais.includes(estadosAtuais[0])) return 'ACEITA'
+    else return 'REJEITA'
+}
+
+// Quantidade par de a's sob o alfabeto {a,b}
+let automatoafn = {
+    alfabeto: ['a', 'b', 'c'],
+    estados: ['0', '1', '2', '3'],
+    estadosIniciais: ['0'],
+    funcoes: {
+        '0,a': ['1', '2'],
+        '1,b': '3',
+        '2,c': '3'
+    },
+    estadosFinais: ['3']
+}
+
+console.log("AFND: ", afnd('ab', automatoafn))

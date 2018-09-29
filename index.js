@@ -36,7 +36,6 @@ let automato = {
 console.log("AFD: ", afd('aa', automato))
 
 
-
 function afnd(str, automato) {
     let cadeia = str.split('');
     let estadosAtuais = automato.estadosIniciais;
@@ -50,7 +49,7 @@ function afnd(str, automato) {
             }
         })
         estadosAtuais = novosEstados;
-        if (novosEstados == null || novosEstados.length <= 0 ) return 'REJEITA'
+        if (novosEstados == null || novosEstados.length <= 0) return 'REJEITA'
     })
     if (estadosAtuais && automato.estadosFinais.includes(estadosAtuais[0])) return 'ACEITA'
     else return 'REJEITA'
@@ -63,10 +62,53 @@ let automatoafn = {
     estadosIniciais: ['0'],
     funcoes: {
         '0,a': ['1', '2'],
-        '1,b': '3',
-        '2,c': '3'
+        '1,b': ['3'],
+        '2,c': ['3']
     },
     estadosFinais: ['3']
 }
 
 console.log("AFND: ", afnd('ab', automatoafn))
+
+function transformaAFND(automato) {
+    let funcoesAdicionar = [];
+    if (automato.estadosIniciais.length > 1) {
+        funcoesAdicionar.push(automato.estadosIniciais)
+    }
+    Object.keys(automato.funcoes).forEach(key => {
+        if (automato.funcoes[key].length > 1) {
+            funcoesAdicionar.push(automato.funcoes[key]);
+        }
+    })
+    while (funcoesAdicionar.length > 0) {
+        automato.alfabeto.forEach(simbolo => {
+            let conjunto = [];
+            funcoesAdicionar[0].forEach(transicao => {
+                let estadoAtual = automato.funcoes[transicao + "," + simbolo];
+                if (estadoAtual) {
+                    conjunto = conjunto.concat(estadoAtual);
+                }
+            })
+            if (conjunto.length > 1) funcoesAdicionar.push(conjunto)
+            if (conjunto.length == 1) automato.funcoes[funcoesAdicionar[0].join("") + "," + simbolo] = conjunto
+        })
+        funcoesAdicionar.shift()
+    }
+    automato.estadoInicial = automato.estadosIniciais.join("");
+    Object.keys(automato.funcoes).forEach(key => {
+        automato.funcoes[key] = automato.funcoes[key].join("")
+    })
+
+    Object.keys(automato.funcoes).forEach(key => {
+        let uses = (automato.estadoInicial == key.split(',')[0]) ? true : Object.keys(automato.funcoes).filter(subKey => {
+            return automato.funcoes[subKey] === key.split(',')[0]
+        }).length > 0;
+       if (!uses) {
+           delete automato.funcoes[key]
+       }
+    })
+    delete automato.estadosIniciais;
+    return automato;    
+}
+
+console.log(transformaAFND(automatoafn))
